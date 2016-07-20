@@ -116,6 +116,9 @@ module Danger
         end
       end
       return obj.public_url
+    rescue
+      FastlaneCore::UI.error("Could not upload file '#{path}'")
+      return nil
     end
 
     def beautiful_device_name(str)
