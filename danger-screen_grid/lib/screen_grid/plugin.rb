@@ -4,6 +4,12 @@ module Danger
   # A danger plugin: https://github.com/danger/danger
   class DangerScreenGrid < Plugin
     def run
+      # Pass AWS access keys using
+      #   ENV['AWS_ACCESS_KEY_ID'],
+      #   ENV['AWS_SECRET_ACCESS_KEY'],
+      #   ENV['AWS_REGION']
+      #   ENV["AWS_BUCKET_NAME"]
+
       require 'snapshot'
       require 'aws-sdk'
       require 'digest/md5'
@@ -41,14 +47,14 @@ module Danger
     private
 
     def s3_bucket
-      @s3_bucket ||= s3_client.bucket("fxplayground" || ENV["AWS_BUCKET_NAME"])
+      @s3_bucket ||= s3_client.bucket(ENV["AWS_BUCKET_NAME"])
     end
 
     def s3_client
       @s3_client ||= Aws::S3::Resource.new(
-        access_key_id: ENV['AWS_ACCESS_KEY_ID'] || s3_access_key,
-        secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'] || s3_secret_access_key,
-        region: "eu-central-1" || ENV['AWS_REGION'] || s3_region
+        access_key_id: ENV['AWS_ACCESS_KEY_ID'],
+        secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'],
+        region: ENV['AWS_REGION']
       )
     end
 
