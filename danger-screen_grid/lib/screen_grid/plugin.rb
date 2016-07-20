@@ -3,6 +3,8 @@ require 'fastlane' # TODO: Remove
 module Danger
   # A danger plugin: https://github.com/danger/danger
   class DangerScreenGrid < Plugin
+    S3_DIRECTORY = "fastlane_screen_grid"
+
     def run
       # Pass AWS access keys using
       #   ENV['AWS_ACCESS_KEY_ID'],
@@ -41,7 +43,16 @@ module Danger
         end
         html << "</table>"
       end
-      markdown(html.join("\n"))
+      html = html.join("\n")
+
+      # Design looks bad still
+      # pr_id = self.env.ci_source.pull_request_id || Time.now.to_s
+      # bucket_path = File.join(S3_DIRECTORY, "#{pr_id}.html")
+      # puts "Storing HTML report as #{bucket_path}"
+      # obj = s3_bucket.object(bucket_path)
+      # obj.put(body: html, acl: 'public-read', content_type: "text/html")
+      # html += "<h3>Check out the full report on <a href='#{obj.public_url}'>S3</a>"
+      markdown(html)
     end
 
     private
@@ -94,9 +105,8 @@ module Danger
         content_type: "image/png",
         acl: "public-read"
       }
-      directory = "fastlane_screen_grid"
 
-      bucket_path = File.join(directory, Digest::MD5.hexdigest(File.read(path)) + ".png")
+      bucket_path = File.join(S3_DIRECTORY, Digest::MD5.hexdigest(File.read(path)) + ".png")
       obj = s3_bucket.object(bucket_path)
       unless obj.exists?
         # File doesn't exist yet, upload it now
