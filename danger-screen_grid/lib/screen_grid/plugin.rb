@@ -54,11 +54,11 @@ module Danger
 
     # => {"en-US"=>
     #   {"iPhone4s"=>
-    #     ["https://fxplayground.s3.eu-central-1.amazonaws.com/screen_grid/a5f9190c55469c5c07f2b6f7102b7d16.png?X-Amz-Algorithm=...",
-    #      "https://fxplayground.s3.eu-central-1.amazonaws.com/screen_grid/f3f71a54072ccb5642ec544a44c5fd18.png?X-Amz-Algorithm=...",
-    #      "https://fxplayground.s3.eu-central-1.amazonaws.com/screen_grid/afe6b4b9fe66ce609dec64a77e4d0713.png?X-Amz-Algorithm=..."],
+    #     ["https://fxplayground.s3.eu-central-1.amazonaws.com/fastlane_screen_grid/a5f9190c55469c5c07f2b6f7102b7d16.png?X-Amz-Algorithm=...",
+    #      "https://fxplayground.s3.eu-central-1.amazonaws.com/fastlane_screen_grid/f3f71a54072ccb5642ec544a44c5fd18.png?X-Amz-Algorithm=...",
+    #      "https://fxplayground.s3.eu-central-1.amazonaws.com/fastlane_screen_grid/afe6b4b9fe66ce609dec64a77e4d0713.png?X-Amz-Algorithm=..."],
     #    "iPhone5"=>
-    #     ["https://fxplayground.s3.eu-central-1.amazonaws.com/screen_grid/57b040e7d8ff35baeb21d7954233b8ce.png?X-Amz-Algorithm=...",
+    #     ["https://fxplayground.s3.eu-central-1.amazonaws.com/fastlane_screen_grid/57b040e7d8ff35baeb21d7954233b8ce.png?X-Amz-Algorithm=...",
     #    ...
     def collect
       puts "Collecting and uploading screenshots..."
@@ -84,16 +84,22 @@ module Danger
     end
 
     def upload_to_s3(path)
-      bucket_path = File.join("screen_grid", Digest::MD5.hexdigest(File.read(path)) + ".png")
+      upload_hash = {
+        content_type: "image/png",
+        acl: "public-read"
+      }
+      directory = "fastlane_screen_grid"
+
+      bucket_path = File.join(directory, Digest::MD5.hexdigest(File.read(path)) + ".png")
       obj = s3_bucket.object(bucket_path)
       unless obj.exists?
         # File doesn't exist yet, upload it now
-        unless obj.upload_file(path, { content_type: "image/png" })
+        unless obj.upload_file(path, upload_hash)
           FastlaneCore::UI.error("Could not upload file '#{path}'")
           return nil
         end
       end
-      return obj.presigned_url(:get, { expires_in: 604_800 }) # That's 7 days
+      return obj.public_url
     end
 
     def beautiful_device_name(str)
