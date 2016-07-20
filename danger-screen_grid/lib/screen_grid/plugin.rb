@@ -116,7 +116,8 @@ module Danger
         end
       end
       return obj.public_url
-    rescue
+    rescue => ex
+      puts ex
       FastlaneCore::UI.error("Could not upload file '#{path}'")
       return nil
     end
