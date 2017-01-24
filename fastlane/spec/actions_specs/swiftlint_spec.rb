@@ -14,7 +14,7 @@ describe Fastlane do
         end
       end
 
-      context "when specify strict options" do
+      context "when specify strict option" do
         it "adds strict option" do
           result = Fastlane::FastFile.new.parse("lane :test do
             swiftlint(
@@ -23,6 +23,18 @@ describe Fastlane do
           end").runner.execute(:test)
 
           expect(result).to eq("swiftlint lint --strict")
+        end
+      end
+
+      context "when specify false for strict option" do
+        it "doesn't add strict option" do
+          result = Fastlane::FastFile.new.parse("lane :test do
+            swiftlint(
+              strict: false
+            )
+          end").runner.execute(:test)
+
+          expect(result).to eq("swiftlint lint")
         end
       end
 
@@ -198,6 +210,18 @@ describe Fastlane do
           end").runner.execute(:test)
 
           expect(result).to eq("swiftlint lint --quiet")
+        end
+      end
+
+      context "when specify false for quiet option" do
+        it "doesn't add quiet option" do
+          result = Fastlane::FastFile.new.parse("lane :test do
+            swiftlint(
+              quiet: false
+            )
+          end").runner.execute(:test)
+
+          expect(result).to eq("swiftlint lint")
         end
       end
     end
