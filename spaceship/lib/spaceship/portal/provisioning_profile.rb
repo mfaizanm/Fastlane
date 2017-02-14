@@ -174,9 +174,6 @@ module Spaceship
                     raise "Can't find class '#{attrs['distributionMethod']}'"
                   end
 
-          # eagerload the Apps using the same client if we have to.
-          attrs['appId'] = App.set_client(@client).factory(attrs['appId'])
-
           klass.client = @client
           obj = klass.new(attrs)
 
@@ -260,6 +257,7 @@ module Spaceship
         # @param mac (Bool) (optional): Pass true to get all Mac provisioning profiles
         # @param xcode (Bool) (optional): Pass true to include Xcode managed provisioning profiles
         def all(mac: false, xcode: false)
+
           profiles = client.provisioning_profiles(mac: mac).map do |profile|
             self.factory(profile)
           end
@@ -475,6 +473,12 @@ module Spaceship
         end
 
         return @certificates
+      end
+
+      def app
+        fetch_details
+
+        App.set_client(client).new(profile_details['appId'])
       end
 
       # @return (Bool) Is this current provisioning profile adhoc?

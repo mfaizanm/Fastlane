@@ -57,9 +57,10 @@ module Spaceship
       puts "Just enter the commands and confirm with Enter".green
 
       # rubocop:disable Lint/Debugger
-      binding.pry(quiet: true)
+      #binding.pry(quiet: true)
+      p = Spaceship::ProvisioningProfile.all.first
       # rubocop:enable Lint/Debugger
-
+      binding.pry(quiet: true)
       puts "" # Fixes https://github.com/fastlane/spaceship/issues/203
     end
 

@@ -26,7 +26,7 @@ module Spaceship
     # @return (Array) A list of all available teams
     def teams
       return @teams if @teams
-      req = request(:post, "https://developerservices2.apple.com/services/QH65B2/listTeams.action")
+      req = request(:post, "account/listTeams.action")
       @teams = parse_response(req, 'teams').sort_by do |team|
         [
           team['name'],
@@ -362,16 +362,11 @@ module Spaceship
 
     def create_device!(device_name, device_id, mac: false)
       ensure_csrf(Spaceship::Device)
-
-      req = request(:post) do |r|
-        r.url "https://developerservices2.apple.com/services/#{PROTOCOL_VERSION}/#{platform_slug(mac)}/addDevice.action"
-        r.params = {
+      req = request(:post, "account/#{platform_slug(mac)}/device/addDevice.action", {
           teamId: team_id,
           deviceNumber: device_id,
           name: device_name
-        }
-      end
-
+      })
       parse_response(req, 'device')
     end
 
@@ -452,6 +447,20 @@ module Spaceship
     #####################################################
 
     def provisioning_profiles(mac: false)
+      paging do |page_number|
+        r = request(:post, "account/#{platform_slug(mac)}/profile/listProvisioningProfiles.action", {
+            teamId: team_id,
+            pageNumber: page_number,
+            pageSize: page_size,
+            sort: 'name=asc',
+            includeInactiveProfiles: true,
+            onlyCountLists: true
+        })
+        parse_response(r, 'provisioningProfiles')
+      end
+    end
+
+    def provisioning_profiles_old(mac: false)
       req = request(:post) do |r|
         r.url "https://developerservices2.apple.com/services/#{PROTOCOL_VERSION}/#{platform_slug(mac)}/listProvisioningProfiles.action"
         r.params = {
@@ -462,7 +471,7 @@ module Spaceship
       end
 
       parse_response(req, 'provisioningProfiles')
-    end
+     end
 
     def provisioning_profile_details(provisioning_profile_id: nil, mac: false)
       r = request(:post, "account/#{platform_slug(mac)}/profile/getProvisioningProfile.action", {
